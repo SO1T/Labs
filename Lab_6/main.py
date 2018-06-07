@@ -11,6 +11,7 @@ def createParser():
     parser.add_argument('--long', type=float, default=30.45735345)
     parser.add_argument('--size', type=float, default=3)
     parser.add_argument('--type')
+    parser.add_argument('--subtype', default='supermarket')
     return parser
 
 # cord - center circle, x1, y1 - dot, R - radius
@@ -55,7 +56,7 @@ def make_counter():
 
 # Leaf with latitude, longtude and information
 class Leaf:
-    def __init__(self, cord, type, subtype, name, adress):
+    def __init__(self, cord, type, subtype, name, adress, subtype):
         self.cord = cord
         xy = findXY(cord[0], cord[1])
         self.x = xy[0]
@@ -143,7 +144,7 @@ class RTree():
         else:
             temp.leafes.append(leaf)
             temp.dots += 1
-    def findCord(self ,cord, R, type=None):
+    def findCord(self ,cord, R, type=None, subtype=None):
         out = []
         q = queue.Queue()
         q.put(self.root)
@@ -156,7 +157,7 @@ class RTree():
                     q.put(temp.children[1])
             else:
                 if type:
-                    out += [el for el in temp.leafes if dotInCircle(cord, el.x, el.y, R) and el.type == type]
+                    out += [el for el in temp.leafes if dotInCircle(cord, el.x, el.y, R) and (el.type == type or el.subtype == subtype)] #and
                 else:
                     out += [el for el in temp.leafes if dotInCircle(cord, el.x, el.y, R)]
 
@@ -182,11 +183,12 @@ if __name__ == '__main__':
         except ValueError:
             print("Value error on line:", i())
 
-    out = tree.findCord(findXY(namespace.lat, namespace.long), namespace.size * 5, namespace.type)
+    out = tree.findCord(findXY(namespace.lat, namespace.long), namespace.size * 5, namespace.type, namespace.subtype)
     
     print("\nCoordinats in decart system:",findXY(namespace.lat, namespace.long))
     print("We found %s next entities in the sector:" % (len(out)))
     for el in out:
         print(el)
     print("\n\nTime: %s seconds" % (round(time.time() - start_time, 2)))
+
     f.close()
